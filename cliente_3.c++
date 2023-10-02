@@ -6,8 +6,8 @@ const char* WIFI_SSID = "pruebaIOT";
 const char* WIFI_PASS = "contra123";
 const char* SERVER_ADDRESS = "192.168.123.247";
 const int SERVER_PORT = 1000;
-const int buttonPin = 32;
-const int buzzerPin = 25; 
+const int BUTTON_PIN = 32;
+const int BUZZER_PIN = 25; 
 
 int distanceOk = 30;
 int currentDistance = distanceOk;
@@ -15,7 +15,7 @@ int interval = 5;
 
 DynamicJsonDocument doc(256);
 
-void sendData(int currentDistance, WiFiClient &client){
+void sendData(int currentDistance, WiFiClient &client) {
   doc["TEST"] = 1;
   doc["distance"] = currentDistance;
   String jsonString;
@@ -25,24 +25,23 @@ void sendData(int currentDistance, WiFiClient &client){
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-void soundBuzzer(int replay){
+void soundBuzzer(int replay) {
   for(int i = 0; i < replay; i += 1){
-      digitalWrite(buzzerPin, HIGH); // Enciende el buzzer
-      delay(100);
-      digitalWrite(buzzerPin, LOW);
-      delay(100);
-    }
+    digitalWrite(BUZZER_PIN, HIGH); // Enciende el buzzer
+    delay(100);
+    digitalWrite(BUZZER_PIN, LOW);
+    delay(100);
+  }
 }
 
-bool CheckInterva(){
+bool checkInterval() {
   return currentDistance > interval;
 }
 
-void updateDistance(WiFiClient &client){
-  if(CheckInterval()){
+void updateDistance(WiFiClient &client) {
+  if (checkInterval()) {
     currentDistance -= interval;
-  }
-  else{
+  } else {
     currentDistance = distanceOk;
     soundBuzzer(1);
     client.stop();
@@ -53,9 +52,9 @@ void updateMessageLCD() {
   lcd.clear();
   lcd.print("Distance:" + String(currentDistance));
   lcd.setCursor(0, 1);
-  if(CheckInterval()){
+  if (checkInterval()) {
     lcd.print("Next:" + String(currentDistance - interval));
-  } else{
+  } else {
     lcd.print("Next:" + String(distanceOk));
   }
 }
@@ -77,9 +76,9 @@ void setup() {
   lcd.backlight();
   lcd.print("Press the button");
   lcd.setCursor(0, 1);
-  lcd.print("D:" + String(distanceOk) + "-"+ String(interval)+" " + "Inter:" + String(interval));
-  pinMode(buttonPin, INPUT_PULLUP);
-  pinMode(buzzerPin, OUTPUT); 
+  lcd.print("D:" + String(distanceOk) + "-" + String(interval) + " " + "Inter:" + String(interval));
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  pinMode(BUZZER_PIN, OUTPUT); 
 }
 
 void loop() {
@@ -89,9 +88,9 @@ void loop() {
     Serial.println("Connection failed");
     return;
   }
-  if(digitalRead(buttonPin) == LOW){
+  if (digitalRead(BUTTON_PIN) == LOW) {
     soundBuzzer(2);
-    sendData(currentDistance,client);
+    sendData(currentDistance, client);
     updateMessageLCD();
     updateDistance(client);
   }  
